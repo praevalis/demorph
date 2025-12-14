@@ -1,60 +1,136 @@
-from uuid import UUID
-from fastapi import HTTPException, status
-from sqlalchemy import create_engine, select
-from typing import TypeVar, Type, Protocol, runtime_checkable
-from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase, Mapped
+import contextlib
+from typing import TypeVar, AsyncIterator
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    AsyncConnection,
+    async_sessionmaker,
+    create_async_engine,
+)
 
-from src.core.config import settings
-from src.core.exceptions import NotFoundException, ForbiddenException
-
-# DB globals for entire application
-engine = create_engine(url=settings.POSTGRES_URI)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 class Base(DeclarativeBase):
     pass
 
-# Helper functions for DB
 
-# Generic database operations
-T = TypeVar("T", bound=Base)  # Generic type for ORM models
+ModelType = TypeVar('ModelType', bound=Base)  # type: ignore
 
-@runtime_checkable
-class ModelProto(Protocol):
-    """Protocol to enforce ID presence."""
-    id: UUID 
 
-def get_by_id_or_404(model: Type[T], id: UUID, session: Session) -> T:
-    """
-    Generic function to fetch an entity by ID or raise 404.
+class DatabaseSessionManager:
+    def __init__(self) -> None:
+        """
+        Constructor for database session manager.
 
-    Args:
-        model: SQLAlchemy model class (e.g., User, Conversation).
-        id: UUID of the entity.
-        session: SQLAlchemy session.
+        Returns:
+            None
+        """
+        self._engine: AsyncEngine | None = None
+        self._sessionmaker: async_sessionmaker | None = None
 
-    Returns:
-        The instance of the model.
+    def init(self, db_url: str) -> None:
+        """
+        Initializes engine and sessionmaker for database.
 
-    Raises:
-        HTTPException: 404 if not found.
-    """
-    instance = session.scalar(select(model).where(model.id == id))  # type: ignore[attr-defined]
-    if not instance:
-        raise NotFoundException(f'{model.__name__} not found.')
-    return instance
+        Args:
+            db_url: Connection string for database.
 
-def assert_entity_identity_match(entity: ModelProto, actor: ModelProto) -> None:
-    """
-    Asserts that the actor's ID matches the target entity's ID.
+        Returns:
+            None
+        """
+        self._engine = create_async_engine(db_url)
+        self._sessionmaker = async_sessionmaker(
+            autocommit=False, bind=self._engine, expire_on_commit=False
+        )
 
-    Args:
-        entity: The target ORM model or object (must have an `id`).
-        actor: The current user or requesting identity (must have an `id`).
+    async def close(self) -> None:
+        """
+        Closes the database session manager and cleans up properties.
 
-    Raises:
-        HTTPException: 403 if IDs don't match.
-    """
-    if getattr(entity, 'id', None) != getattr(actor, 'id', None):
-        label = type(entity).__name__
-        raise ForbiddenException(f'{label} identity mismatch.')
+        Returns:
+            None
+        """
+        if not self._engine:
+            raise Exception('Database session manager not initialized.')
+
+        await self._engine.dispose()
+        self._engine = None
+        self._sessionmaker = None
+
+    @contextlib.asynccontextmanager
+    async def connect(self) -> AsyncIterator[AsyncConnection]:
+        """
+        Creates a connection object for database.
+
+        Yields:
+            AsyncConnection: Connection object.
+
+        Raises:
+            Exception: When an error occurs during the connection.
+        """
+        if not self._engine:
+            raise Exception('Database session manager not initialized.')
+
+        async with self._engine.begin() as connection:
+            try:
+                yield connection
+            except Exception:
+                await connection.rollback()
+                raise
+
+        # Connection is closed by the engine itself.
+        # Thus, no need to handle that.
+
+    @contextlib.asynccontextmanager
+    async def session(self) -> AsyncIterator[AsyncSession]:
+        """
+        Creates a session object for database.
+
+        Returns:
+            AsyncSession: Session object.
+
+        Raises:
+            Exception: When an error occurs during the session.
+        """
+        if not self._sessionmaker:
+            raise Exception('Database session manager not initialized.')
+
+        session = self._sessionmaker()
+
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
+
+    # methods to be used for testing
+    async def create_all(self, connection: AsyncConnection) -> None:
+        """
+        Creates all tables attached to a declarative base.
+
+        Args:
+            connection: Database connection.
+
+        Returns:
+            None
+        """
+        global Base
+        await connection.run_sync(Base.metadata.create_all)
+
+    async def drop_all(self, connection: AsyncConnection) -> None:
+        """
+        Drops all tables attached to a declarative base.
+
+        Args:
+            connection: Database connection.
+
+        Returns:
+            None
+        """
+        global Base
+        await connection.run_sync(Base.metadata.drop_all)
+
+
+sessionmanager = DatabaseSessionManager()
