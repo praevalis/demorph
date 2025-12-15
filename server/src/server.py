@@ -4,8 +4,10 @@ from contextlib import AbstractAsyncContextManager
 
 from src.core.lifespan import lifespan
 from src.core.middlewares import cors_middleware
-from server.src.user.routers import router as user_router
-from server.src.auth.routers import router as auth_router
+from src.user.routers import router as user_router
+from src.auth.routers import router as auth_router
+from src.user.dependencies import get_user_service
+from src.auth.dependencies import get_user_provider
 from src.core.exceptions.handlers import register_error_handlers
 from src.core.metadata import title, version, description, tags
 
@@ -38,6 +40,8 @@ def create_app(init_db: bool = True) -> FastAPI:
     register_error_handlers(app)
 
     cors_middleware.add(app)
+
+    app.dependency_overrides[get_user_provider] = get_user_service
 
     app.include_router(auth_router)
     app.include_router(user_router)

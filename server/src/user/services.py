@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.user.models import User
 from src.core.security import hash_password
 from src.core.exceptions.exceptions import NotFound, BadRequest
-from src.user.dtos import UserDto, UserCreateDto, UserUpdateDto
+from src.user.dtos import UserDto, UserInternalDto, UserCreateDto, UserUpdateDto
 
 
 class UserService:
@@ -35,7 +35,7 @@ class UserService:
 
         return user
 
-    async def get_user(self, id: UUID) -> UserDto:
+    async def get_user(self, id: UUID) -> UserInternalDto:
         """
         Fetches user by ID.
 
@@ -43,12 +43,12 @@ class UserService:
             id: ID of the user to fetch.
 
         Returns:
-            UserDto: Fetched user.
+            UserInternalDto: Fetched user.
         """
         user = await self._get_by_id(id)
-        return UserDto.model_validate(user)
+        return UserInternalDto.model_validate(user)
 
-    async def get_user_by_username(self, username: str) -> UserDto:
+    async def get_user_by_username(self, username: str) -> UserInternalDto:
         """
         Fetches user by username.
 
@@ -56,7 +56,7 @@ class UserService:
             username: Username of the user to fetch.
 
         Returns:
-            UserDto: Fetched user.
+            UserInternalDto: Fetched user.
         """
         query = select(User).where(User.username == username)
         user = await self.db.scalar(query)
@@ -64,7 +64,7 @@ class UserService:
         if not user:
             raise NotFound('User not found.')
 
-        return UserDto.model_validate(user)
+        return UserInternalDto.model_validate(user)
 
     async def create_user(self, create_dto: UserCreateDto) -> UserDto:
         """

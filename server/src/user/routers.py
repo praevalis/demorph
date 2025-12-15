@@ -6,9 +6,30 @@ from src.user.services import UserService
 from src.user.dependencies import get_user_service
 from src.auth.dependencies import get_current_user
 from src.core.exceptions.exceptions import Forbidden
-from src.user.dtos import UserDto, UserCreateDto, UserUpdateDto
+from src.user.dtos import UserDto, UserInternalDto, UserCreateDto, UserUpdateDto
 
 router = APIRouter(prefix='/users', tags=[ApiTags.user])
+
+
+@router.get(
+    '/me',
+    status_code=status.HTTP_200_OK,
+    response_model=UserDto,
+    response_model_by_alias=True,
+)
+async def get_current_user_controller(
+    current_user: UserInternalDto = Depends(get_current_user),
+) -> UserDto:
+    """
+    Controller to get user.
+
+    Args:
+        current_user: Authenticated user.
+
+    Returns:
+        UserDto: Fetched user.
+    """
+    return UserDto.model_validate(current_user)
 
 
 @router.get(
@@ -20,7 +41,7 @@ router = APIRouter(prefix='/users', tags=[ApiTags.user])
 async def get_user_controller(
     user_id: UUID,
     user_service: UserService = Depends(get_user_service),
-    _: UserDto = Depends(get_current_user),
+    _: UserInternalDto = Depends(get_current_user),
 ) -> UserDto:
     """
     Controller to get user.
@@ -32,7 +53,8 @@ async def get_user_controller(
     Returns:
         UserDto: Fetched user.
     """
-    return await user_service.get_user(user_id)
+    internal_user = await user_service.get_user(user_id)
+    return UserDto.model_validate(internal_user)
 
 
 @router.post(
@@ -67,7 +89,7 @@ async def update_user_controller(
     user_id: UUID,
     update_dto: UserUpdateDto,
     user_service: UserService = Depends(get_user_service),
-    current_user: UserDto = Depends(get_current_user),
+    current_user: UserInternalDto = Depends(get_current_user),
 ) -> UserDto:
     """
     Controller to update user.
@@ -93,7 +115,7 @@ async def update_user_controller(
 async def delete_user_controller(
     user_id: UUID,
     user_service: UserService = Depends(get_user_service),
-    current_user: UserDto = Depends(get_current_user),
+    current_user: UserInternalDto = Depends(get_current_user),
 ) -> None:
     """
     Controller to delete an user.

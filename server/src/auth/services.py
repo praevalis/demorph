@@ -48,7 +48,7 @@ class AuthService:
             data,
             secret_key=settings.SECRET_KEY.get_secret_value(),
             algorithm=settings.ALGORITHM,
-            expires_delta=timedelta(minutes=settings.REFRESH_TOKEN_EXPIRES_DAYS),
+            expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRES_DAYS),
             token_type=TokenTypeEnum.REFRESH,
         )
 
@@ -76,10 +76,10 @@ class AuthService:
 
         return AuthDto(
             access_token=self._create_access_token(
-                {'sub': user.id, 'type': TokenTypeEnum.ACCESS}
+                {'sub': str(user.id), 'type': TokenTypeEnum.ACCESS}
             ),
             refresh_token=self._create_refresh_token(
-                {'sub': user.id, 'type': TokenTypeEnum.REFRESH}
+                {'sub': str(user.id), 'type': TokenTypeEnum.REFRESH}
             ),
         )
 

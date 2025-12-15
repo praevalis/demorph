@@ -5,6 +5,19 @@ from pydantic import EmailStr, Field
 from src.core.dtos import RequestDto, ResponseDto
 
 
+class UserInternalDto(ResponseDto):
+    id: UUID
+
+    username: str
+    email: EmailStr
+    first_name: str
+    last_name: str | None
+    password_hash: str
+
+    joined_at: datetime
+    updated_at: datetime
+
+
 class UserDto(ResponseDto):
     id: UUID
 

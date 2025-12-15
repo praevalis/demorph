@@ -1,10 +1,10 @@
-from typing import AsyncGenerator
+from typing import AsyncIterable
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import sessionmanager
 
 
-async def get_db() -> AsyncGenerator[AsyncSession]:
+async def get_db() -> AsyncIterable[AsyncSession]:
     """
     Dependency injector async database session.
 

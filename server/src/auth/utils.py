@@ -1,10 +1,9 @@
 import jwt
 from typing import Any
-
 from datetime import datetime, timedelta, UTC
 from jwt import ExpiredSignatureError, InvalidTokenError
 
-from server.src.auth.dtos import TokenTypeEnum
+from src.auth.dtos import TokenTypeEnum
 from src.core.exceptions.exceptions import Unauthorized
 
 
