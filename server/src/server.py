@@ -4,8 +4,8 @@ from contextlib import AbstractAsyncContextManager
 
 from src.core.lifespan import lifespan
 from src.core.middlewares import cors_middleware
-from src.user.router import router as user_router
-from src.auth.router import router as auth_router
+from server.src.user.routers import router as user_router
+from server.src.auth.routers import router as auth_router
 from src.core.exceptions.handlers import register_error_handlers
 from src.core.metadata import title, version, description, tags
 

@@ -1,61 +1,140 @@
 from uuid import UUID
-from sqlalchemy.orm import Session
+from sqlalchemy import select, or_
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.user.models import User
-from src.user.schemas import UserDto, UserUpdateDto
-from src.core.database import (
-    get_by_id_or_404, 
-    assert_entity_identity_match
-)
+from src.core.security import hash_password
+from src.core.exceptions.exceptions import NotFound, BadRequest
+from src.user.dtos import UserDto, UserCreateDto, UserUpdateDto
 
-async def update_user(
-    user_id: UUID, 
-    update_data: UserUpdateDto, 
-    session: Session,
-    current_user: UserDto
-) -> UserDto:
-    """
-    Updates an user.
-    
-    Args:
-        user_id: ID of the user to update.
-        update_data: Data to update.
-        session: DB session.
-        current_user: User who sent the request.
 
-    Returns: 
-        UserDto: Updated user.
-    """
-    user_to_update = get_by_id_or_404(User, user_id, session)
-    assert_entity_identity_match(UserDto.model_validate(user_to_update), current_user)
+class UserService:
+    """Service class that handles user management logic."""
 
-    update_dict = update_data.model_dump(exclude_unset=True)
-    for field, value in update_dict.items():
-        setattr(user_to_update, field, value)
+    def __init__(self, db: AsyncSession) -> None:
+        self.db = db
 
-    session.commit()
-    session.refresh(user_to_update)
+    async def _get_by_id(self, id: UUID) -> User:
+        """
+        Private helper to fetch user by ID.
 
-    return UserDto.model_validate(user_to_update)
-    
-async def delete_user(
-    user_id: UUID,
-    session: Session,
-    current_user: UserDto
-) -> None:
-    """
-    Deletes an user.
+        Args:
+            id: ID of the user.
 
-    Args:
-        user_id: ID of the user to delete.
-        session: DB session.
-        current_user: User who sent the request.
+        Returns:
+            User: Fetched user.
 
-    Returns:
-        None
-    """
-    user_to_delete = get_by_id_or_404(User, user_id, session)
-    assert_entity_identity_match(UserDto.model_validate(user_to_delete), current_user)
+        Raises:
+            NotFound: When user is not found.
+        """
+        query = select(User).where(User.id == id)
+        user = await self.db.scalar(query)
 
-    session.delete(user_to_delete)
-    session.flush()
+        if not user:
+            raise NotFound('User not found.')
+
+        return user
+
+    async def get_user(self, id: UUID) -> UserDto:
+        """
+        Fetches user by ID.
+
+        Args:
+            id: ID of the user to fetch.
+
+        Returns:
+            UserDto: Fetched user.
+        """
+        user = await self._get_by_id(id)
+        return UserDto.model_validate(user)
+
+    async def get_user_by_username(self, username: str) -> UserDto:
+        """
+        Fetches user by username.
+
+        Args:
+            username: Username of the user to fetch.
+
+        Returns:
+            UserDto: Fetched user.
+        """
+        query = select(User).where(User.username == username)
+        user = await self.db.scalar(query)
+
+        if not user:
+            raise NotFound('User not found.')
+
+        return UserDto.model_validate(user)
+
+    async def create_user(self, create_dto: UserCreateDto) -> UserDto:
+        """
+        Creates new user.
+
+        Args:
+            create_dto: Data to create user.
+
+        Returns:
+            UserDto: Created user.
+        """
+        query = select(User).where(
+            or_(User.username == create_dto.username, User.email == create_dto.email)
+        )
+        existing_user = await self.db.scalar(query)
+
+        if existing_user:
+            raise BadRequest('Username or email already exists.')
+
+        hashed_pw = hash_password(create_dto.password)
+
+        user = User(
+            username=create_dto.username,
+            email=create_dto.email,
+            first_name=create_dto.first_name.strip(),
+            last_name=create_dto.last_name.strip() if create_dto.last_name else None,
+            password_hash=hashed_pw,
+        )
+        self.db.add(user)
+        await self.db.flush()
+        await self.db.refresh(user)
+
+        return UserDto.model_validate(user)
+
+    async def update_user(self, id: UUID, update_dto: UserUpdateDto) -> UserDto:
+        """
+        Updates an user.
+
+        Args:
+            id: ID of the user to update.
+            update_dto: Date to update user.
+
+        Returns:
+            UserDto: Updated user.
+        """
+        user = await self._get_by_id(id)
+
+        if update_dto.password:
+            hashed_pw = hash_password(update_dto.password)
+            user.password_hash = hashed_pw
+
+        update_dict = update_dto.model_dump(exclude_unset=True, exclude={'password'})
+        for key, value in update_dict.items():
+            setattr(user, key, value)
+
+        await self.db.flush()
+        await self.db.refresh(user)
+
+        return UserDto.model_validate(user)
+
+    async def delete_user(self, id: UUID) -> None:
+        """
+        Deletes an user.
+
+        Args:
+            id: ID of the user to delete.
+
+        Returns:
+            None
+        """
+        user = await self._get_by_id(id)
+        await self.db.delete(user)
+        await self.db.flush()
