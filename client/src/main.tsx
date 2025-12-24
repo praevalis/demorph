@@ -1,24 +1,23 @@
-import { StrictMode } from 'react';
+import { Suspense, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import '@fontsource/kaisei-decol/index.css';
-import '@fontsource/pirata-one/index.css';
-import '@fontsource/kanit/index.css';
-import './index.css';
 
-import { routes } from './utils/appConfig';
-import { AuthProvider } from './context/AuthContext';
+import '@fontsource/poppins/400.css';
+import '@fontsource/montserrat/600.css';
+import '@fontsource/montserrat/700.css';
 
-const App = () => {
-	return (
-		<AuthProvider>
-			<RouterProvider router={createBrowserRouter(routes)} />
-		</AuthProvider>
-	);
-};
+import '@/lib/i18n';
+import '@/index.css';
+import { routes } from '@/lib/app-config';
+
+function App() {
+	return <RouterProvider router={createBrowserRouter(routes)} />;
+}
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<App />
+		<Suspense fallback=''>
+			<App />
+		</Suspense>
 	</StrictMode>,
 );

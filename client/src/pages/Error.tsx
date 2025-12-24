@@ -1,11 +1,9 @@
-import Page from '../components/Page';
+import DefaultLayout from '@/components/layout/default-layout';
 
-const Error = () => {
+export default function Error() {
 	return (
-		<Page>
+		<DefaultLayout>
 			<div></div>
-		</Page>
+		</DefaultLayout>
 	);
-};
-
-export default Error;
+}

@@ -1,12 +1,14 @@
 @import 'tailwindcss';
 
 @theme {
-	--color-cursed-noir: #121213;
-	--color-ultra-moss: #bdff4c;
-	--color-wet-concrete: #383838;
-	--color-walk-park: #7db614;
+	--font-primary: 'Montserrat', sans-serif;
+	--font-secondary: 'Poppins', sans-serif;
 
-	--font-pirata-one: 'Pirata One', system-ui;
-	--font-kaisei: 'Kaisei Decol', serif;
-	--font-kanit: 'Kanit', sans-serif;
+	--color-primary: hsla(239, 84%, 65%, 1); /* Purple */
+	--color-secondary: hsla(199, 95%, 60%, 1); /* Vibrant Cyan */
+	--color-accent: hsla(263, 70%, 50%, 1); /* Deep Violet */
+	--color-primary-light: hsla(249, 82%, 65%, 1);
+	--color-background: hsla(232, 11%, 14%, 1); /* Soft black */
+	--color-foreground: hsla(240, 16%, 32%, 1); /* Purplish gray */
+	--color-dark-gray: hsla(233, 9%, 19%, 1);
 }
