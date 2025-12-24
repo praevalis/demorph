@@ -1,12 +1,20 @@
-import Page from '../components/Page';
-import Hero from '../sections/Home/Hero';
+import Hero from '@/features/home/hero';
+import About from '@/features/home/about';
+import Feature from '@/features/home/feature';
+import Benefit from '@/features/home/benefit';
+import Algorithm from '@/features/home/algorithm';
+import BlogBanner from '@/features/home/blog-banner';
+import DefaultLayout from '@/components/layout/default-layout';
 
-const Home = () => {
+export default function Home() {
 	return (
-		<Page>
+		<DefaultLayout>
 			<Hero />
-		</Page>
+			<About />
+			<Feature />
+			<BlogBanner />
+			<Algorithm />
+			<Benefit />
+		</DefaultLayout>
 	);
-};
-
-export default Home;
+}

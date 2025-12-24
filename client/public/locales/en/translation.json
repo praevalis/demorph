@@ -1,0 +1,143 @@
+{
+	"navbar": {
+		"title": "DeMorph",
+		"cta": {
+			"label": "Analyze",
+			"href": "/"
+		},
+		"links": [
+			{
+				"label": "How it Works",
+				"href": "/#about"
+			},
+			{
+				"label": "Technology",
+				"href": "/#algorithm"
+			}
+		]
+	},
+	"hero": {
+		"headline": "Complete\nDeepfake Shield",
+		"paragraph": "Enterprise-grade multimodal detection for files and APIs. Verify content, safeguard identity, and prevent digital fraud.",
+		"cta": {
+			"label": "Start Free Scan",
+			"href": "/"
+		}
+	},
+	"about": {
+		"heading": "Advanced Forensics Made Simple",
+		"subheading": "We handle the complexity of multimodal neural networks so you can verify content authenticity with a single click.",
+		"cards": [
+			{
+				"icon": "scan",
+				"layout": "horizontal",
+				"heading": "Frame-by-Frame Inspection",
+				"text": "Our engine scans every pixel and phoneme, detecting visual artifacts and warping invisible to the naked human eye."
+			},
+			{
+				"icon": "activity",
+				"layout": "horizontal",
+				"heading": "Multimodal Fusion",
+				"text": "We cross-reference audio wave patterns with facial landmarks to spot subtle lip-sync errors and emotion mismatches."
+			},
+			{
+				"icon": "lock",
+				"layout": "horizontal",
+				"heading": "Enterprise Security",
+				"text": "Bank-level encryption and isolated workspaces ensure your sensitive investigations and evidence remain confidential."
+			},
+			{
+				"icon": "file",
+				"layout": "vertical",
+				"heading": "Court-Ready Reports",
+				"text": "Generate downloadable forensic PDF reports complete with timestamped anomaly heatmaps and hash verification."
+			}
+		]
+	},
+	"feature": {
+		"heading": "How is DeMorph different",
+		"cards": [
+			{
+				"text": "Proprietary Audio-Visual consistency checking algorithms tailored for high-compression video."
+			},
+			{
+				"text": "Trained on the latest diverse datasets including FaceForensics++, DFDC, and wild samples."
+			},
+			{
+				"text": "Explainable AI (XAI) heatmaps that show you exactly where the manipulation occurred."
+			},
+			{
+				"text": "API-first design allowing for seamless integration into your existing KYC or moderation workflows."
+			}
+		]
+	},
+	"blog": {
+		"heading": "The threat of synthetic media is growing exponentially",
+		"subheading": "Learn how generative AI is reshaping the cybersecurity landscape and how to protect your organization.",
+		"cta": {
+			"label": "Read the Whitepaper",
+			"href": "https://en.wikipedia.org/wiki/Deepfake"
+		}
+	},
+	"algorithm": {
+		"heading": "Your Verification Workflow",
+		"ring": "Verified\nResult",
+		"cards": [
+			{
+				"text": "Upload your suspect media file securely to our encrypted processing cloud"
+			},
+			{
+				"text": "Our AI extracts facial landmarks and audio spectrograms in parallel"
+			},
+			{
+				"text": "The Cross-Attention engine detects synchronization discrepancies"
+			},
+			{
+				"text": "Receive a detailed forensic report with a definitive trust score"
+			}
+		]
+	},
+	"benefit": {
+		"heading": "Why adopt DeMorph?",
+		"subheading": "In an era of AI-generated misinformation, passive detection is no longer enough. You need proactive defense.",
+		"points": [
+			{
+				"icon": "target",
+				"label": "Accuracy",
+				"description": "Achieving high detection rates on uncompressed video samples"
+			},
+			{
+				"icon": "zap",
+				"label": "Speed",
+				"description": "Real-time inference capabilities using optimized ONNX runtimes"
+			},
+			{
+				"icon": "gavel",
+				"label": "Compliance",
+				"description": "Adhere to emerging digital safety, identity, and KYC regulations"
+			}
+		]
+	},
+	"footer": {
+		"title": "DeMorph",
+		"message": "DeMorph empowers truth in the digital age. Unauthorized use of our detection engine for malicious purposes is strictly prohibited.",
+		"copyright": "\u00A9 <0>Akshat Mishra</0> | 2025",
+		"socials": [
+			{
+				"icon": "linkedin",
+				"label": "Linkedin",
+				"href": "https://www.linkedin.com/in/akshat--mishra/"
+			},
+			{
+				"icon": "twitter",
+				"label": "Twitter",
+				"href": "https://x.com/imakshatmishra"
+			},
+			{
+				"icon": "github",
+				"label": "Github",
+				"href": "https://github.com/praevalis"
+			}
+		]
+	}
+}
